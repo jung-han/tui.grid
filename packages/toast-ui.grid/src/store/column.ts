@@ -35,8 +35,7 @@ import {
   isUndefined,
   isNumber,
   findProp,
-  uniq,
-  isEmpty
+  uniq
 } from '../helper/common';
 import { DefaultRenderer } from '../renderer/default';
 import { editorMap } from '../editor/manager';
@@ -201,7 +200,8 @@ export function createColumn(
   relationColumns: string[],
   gridCopyOptions: ClipboardCopyOptions,
   treeColumnOptions: OptTree,
-  columnHeaderInfo: ColumnHeaderInfo
+  columnHeaderInfo: ColumnHeaderInfo,
+  disabled: boolean
 ): ColumnInfo {
   const {
     name,
@@ -270,11 +270,16 @@ export function createColumn(
     headerVAlign,
     filter: filterOptions,
     headerRenderer,
-    className
+    className,
+    disabled
   });
 }
 
-function createRowHeader(data: OptRowHeader, columnHeaderInfo: ColumnHeaderInfo): ColumnInfo {
+function createRowHeader(
+  data: OptRowHeader,
+  columnHeaderInfo: ColumnHeaderInfo,
+  disabled: boolean
+): ColumnInfo {
   const rowHeader: OptColumn = isString(data)
     ? { name: rowHeadersMap[data] }
     : { name: rowHeadersMap[data.type], ...omit(data, 'type') };
@@ -307,7 +312,8 @@ function createRowHeader(data: OptRowHeader, columnHeaderInfo: ColumnHeaderInfo)
     minWidth: baseMinWith,
     headerAlign,
     headerVAlign,
-    headerRenderer
+    headerRenderer,
+    disabled
   });
 }
 
@@ -353,6 +359,7 @@ interface ColumnOption {
   align: AlignType;
   valign: VAlignType;
   columnHeaders: OptColumnHeaderInfo[];
+  disabled: boolean;
 }
 
 export function create({
@@ -365,7 +372,8 @@ export function create({
   complexColumns,
   align,
   valign,
-  columnHeaders
+  columnHeaders,
+  disabled
 }: ColumnOption): Column {
   const relationColumns = columns.reduce((acc: string[], { relations }) => {
     acc = acc.concat(createRelationColumns(relations || []));
@@ -373,7 +381,9 @@ export function create({
   }, []);
 
   const columnHeaderInfo = { columnHeaders, align, valign };
-  const rowHeaderInfos = rowHeaders.map(rowHeader => createRowHeader(rowHeader, columnHeaderInfo));
+  const rowHeaderInfos = rowHeaders.map(rowHeader =>
+    createRowHeader(rowHeader, columnHeaderInfo, disabled)
+  );
 
   const columnInfos = columns.map(column =>
     createColumn(
@@ -382,7 +392,8 @@ export function create({
       relationColumns,
       copyOptions,
       treeColumnOptions,
-      columnHeaderInfo
+      columnHeaderInfo,
+      !!(disabled || column.disabled)
     )
   );
 
