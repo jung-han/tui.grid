@@ -9,7 +9,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Hello world action step
-        uses: jung-han/github_actions_test # Uses an action in the root directory
+        uses: jung-han/github_actions_test@0.1.0 # Uses an action in the root directory
         id: hello
         with:
           who-to-greet: 'Mona the Octocat'
